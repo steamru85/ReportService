@@ -1,0 +1,8 @@
+version: '3'
+
+services:
+  reportservice:
+    image: reportservice
+    build:
+      context: .
+      dockerfile: ReportService/Dockerfile
