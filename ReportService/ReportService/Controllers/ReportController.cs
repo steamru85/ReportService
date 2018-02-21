@@ -32,7 +32,7 @@ namespace ReportService.Controllers
                 var reader1 = cmd1.ExecuteReader();
                 while (reader1.Read())
                 {
-                    var emp = new Employee() { Name = reader.GetString(0), Inn = reader.GetString(1), Department = reader.GetString(3) };
+                    var emp = new Employee() { Name = reader.GetString(0), Inn = reader.GetString(1), Department = reader.GetString(2) };
                     emp.BuhCode = EmpCodeResolver.GetCode(emp.Inn).Result;
                     emp.Salary = emp.Salary();
                     emplist.Add(emp);
@@ -40,7 +40,10 @@ namespace ReportService.Controllers
                         continue;
                     emplist.Add(emp);
                 }
+                foreach(var emp in emplist)
+                {
 
+                }                
             }
             var file = System.IO.File.ReadAllBytes("C:\\report.txt");
             var response = File(file, "application/octet-stream", "report.txt");
