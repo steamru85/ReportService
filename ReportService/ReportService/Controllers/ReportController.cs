@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
@@ -16,6 +17,8 @@ namespace ReportService.Controllers
         [Route("{month}")]
         public IActionResult Download(int month)
         {
+            var actions = new Dictionary<Employee, Action<Employee, string>>();
+            string report = new DateTime(2010, month, 1).ToString("MMMMMM", CultureInfo.CurrentCulture);
             var connString = "Host=127.0.0.1;Username=postgres;Password=1;Database=employee";
             List<Employee> emplist = new List<Employee>();
 
@@ -40,11 +43,27 @@ namespace ReportService.Controllers
                         continue;
                     emplist.Add(emp);
                 }
-                foreach(var emp in emplist)
-                {
 
-                }                
+                actions.Add(null, new ReportFormatter(null).NL);
+                actions.Add(null, new ReportFormatter(null).WL);
+                actions.Add(new Employee() { Department = depName } , new ReportFormatter(null).WD);
+                for (int i = 1; i < emplist.Count(); i ++)
+                {
+                    actions.Add(emplist[i], new ReportFormatter(emplist[i]).NL);
+                    actions.Add(emplist[i], new ReportFormatter(emplist[i]).WE);
+                    actions.Add(emplist[i], new ReportFormatter(emplist[i]).WT);
+                    actions.Add(emplist[i], new ReportFormatter(emplist[i]).WS);
+                }  
+
             }
+            actions.Add(null, new ReportFormatter(null).NL);
+            actions.Add(null, new ReportFormatter(null).WL);
+
+            foreach (var act in actions)
+            {
+                act.Value(act.Key, report);
+            }
+            System.IO.File.WriteAllText("C:\\report.txt", report);
             var file = System.IO.File.ReadAllBytes("C:\\report.txt");
             var response = File(file, "application/octet-stream", "report.txt");
             return response;
