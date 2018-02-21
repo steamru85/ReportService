@@ -14,11 +14,11 @@ namespace ReportService.Controllers
     public class ReportController : Controller
     {
         [HttpGet]
-        [Route("{month}")]
-        public IActionResult Download(int month)
+        [Route("{year}/{month}")]
+        public IActionResult Download(int year, int month)
         {
             var actions = new Dictionary<Employee, Action<Employee, string>>();
-            string report = new DateTime(2010, month, 1).ToString("MMMMMM", CultureInfo.CurrentCulture);
+            string report = MonthNameResolver.MonthName.GetName(year, month);
             var connString = "Host=127.0.0.1;Username=postgres;Password=1;Database=employee";
             List<Employee> emplist = new List<Employee>();
 
