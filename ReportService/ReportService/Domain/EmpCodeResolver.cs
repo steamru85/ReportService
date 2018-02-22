@@ -11,8 +11,8 @@ namespace ReportService.Domain
     {
         public static async Task<string> GetCode(string inn)
         {
-                var client = new HttpClient();
-                return await client.GetStringAsync("http://buh.local/"+inn); 
+            var client = new HttpClient();
+            return await client.GetStringAsync("http://buh.local/api/inn/" + inn);
         }
     }
 }

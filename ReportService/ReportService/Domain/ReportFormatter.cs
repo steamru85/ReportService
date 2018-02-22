@@ -12,12 +12,12 @@ namespace ReportService.Domain
             Employee = e;
         }
 
-        public Action<Employee, string> NL = (e, s) => s = s + Environment.NewLine;
-        public Action<Employee, string> WL = (e, s) => s = s + "--------------------------------------------";
-        public Action<Employee, string> WT = (e, s) => s = s + "         ";
-        public Action<Employee, string> WE = (e, s) => s = s + e.Name;
-        public Action<Employee, string> WS = (e, s) => s = s + e.Salary + "р";
-        public Action<Employee, string> WD = (e, s) => s = s + e.Department;
+        public Action<Employee, Report> NL = (e, s) => s.S = s.S + Environment.NewLine;
+        public Action<Employee, Report> WL = (e, s) => s.S = s.S + "--------------------------------------------";
+        public Action<Employee, Report> WT = (e, s) => s.S = s.S + "         ";
+        public Action<Employee, Report> WE = (e, s) => s.S = s.S + e.Name;
+        public Action<Employee, Report> WS = (e, s) => s.S = s.S + e.Salary + "р";
+        public Action<Employee, Report> WD = (e, s) => s.S = s.S + e.Department;
         public Employee Employee { get; }
     }
 }

@@ -17,54 +17,55 @@ namespace ReportService.Controllers
         [Route("{year}/{month}")]
         public IActionResult Download(int year, int month)
         {
-            var actions = new Dictionary<Employee, Action<Employee, string>>();
-            string report = MonthNameResolver.MonthName.GetName(year, month);
-            var connString = "Host=127.0.0.1;Username=postgres;Password=1;Database=employee";
-            List<Employee> emplist = new List<Employee>();
+            var actions = new List<(Action<Employee, Report>, Employee)>();
+            var report = new Report() { S = MonthNameResolver.MonthName.GetName(year, month) };
+            var connString = "Host=192.168.99.100;Username=postgres;Password=1;Database=employee";
+            
 
             var conn = new NpgsqlConnection(connString);
             conn.Open();
-            var cmd = new NpgsqlCommand("SELECT d.name from deps where d.active = true", conn);
+            var cmd = new NpgsqlCommand("SELECT d.name from deps d where d.active = true", conn);
             var reader = cmd.ExecuteReader();
             while (reader.Read())
             {
+                List<Employee> emplist = new List<Employee>();
                 var depName = reader.GetString(0);
                 var conn1 = new NpgsqlConnection(connString);
                 conn1.Open();
-                var cmd1 = new NpgsqlCommand("SELECT e.name, e.inn, d.name from emps e left join deps d on e.departmentid = d.id", conn);
+                var cmd1 = new NpgsqlCommand("SELECT e.name, e.inn, d.name from emps e left join deps d on e.departmentid = d.id", conn1);
                 var reader1 = cmd1.ExecuteReader();
                 while (reader1.Read())
                 {
-                    var emp = new Employee() { Name = reader.GetString(0), Inn = reader.GetString(1), Department = reader.GetString(2) };
+                    var emp = new Employee() { Name = reader1.GetString(0), Inn = reader1.GetString(1), Department = reader1.GetString(2) };
                     emp.BuhCode = EmpCodeResolver.GetCode(emp.Inn).Result;
                     emp.Salary = emp.Salary();
-                    emplist.Add(emp);
                     if (emp.Department != depName)
                         continue;
                     emplist.Add(emp);
                 }
 
-                actions.Add(null, new ReportFormatter(null).NL);
-                actions.Add(null, new ReportFormatter(null).WL);
-                actions.Add(new Employee() { Department = depName } , new ReportFormatter(null).WD);
+                actions.Add((new ReportFormatter(null).NL, new Employee()));
+                actions.Add((new ReportFormatter(null).WL, new Employee()));
+                actions.Add((new ReportFormatter(null).NL, new Employee()));
+                actions.Add((new ReportFormatter(null).WD, new Employee() { Department = depName } ));
                 for (int i = 1; i < emplist.Count(); i ++)
                 {
-                    actions.Add(emplist[i], new ReportFormatter(emplist[i]).NL);
-                    actions.Add(emplist[i], new ReportFormatter(emplist[i]).WE);
-                    actions.Add(emplist[i], new ReportFormatter(emplist[i]).WT);
-                    actions.Add(emplist[i], new ReportFormatter(emplist[i]).WS);
+                    actions.Add((new ReportFormatter(emplist[i]).NL, emplist[i]));
+                    actions.Add((new ReportFormatter(emplist[i]).WE, emplist[i]));
+                    actions.Add((new ReportFormatter(emplist[i]).WT, emplist[i]));
+                    actions.Add((new ReportFormatter(emplist[i]).WS, emplist[i]));
                 }  
 
             }
-            actions.Add(null, new ReportFormatter(null).NL);
-            actions.Add(null, new ReportFormatter(null).WL);
+            actions.Add((new ReportFormatter(null).NL, null));
+            actions.Add((new ReportFormatter(null).WL, null));
 
             foreach (var act in actions)
             {
-                act.Value(act.Key, report);
+                act.Item1(act.Item2, report);
             }
-            System.IO.File.WriteAllText("C:\\report.txt", report);
-            var file = System.IO.File.ReadAllBytes("C:\\report.txt");
+            report.Save();
+            var file = System.IO.File.ReadAllBytes("D:\\report.txt");
             var response = File(file, "application/octet-stream", "report.txt");
             return response;
         }

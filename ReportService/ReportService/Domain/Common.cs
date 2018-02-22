@@ -12,7 +12,7 @@ namespace ReportService.Domain
     {
         public static int Salary(this Employee employee)
         {
-            var httpWebRequest = (HttpWebRequest)WebRequest.Create("http://salary.local/");
+            var httpWebRequest = (HttpWebRequest)WebRequest.Create("http://salary.local/api/empcode/"+employee.Inn);
             httpWebRequest.ContentType = "application/json";
             httpWebRequest.Method = "POST";
 
