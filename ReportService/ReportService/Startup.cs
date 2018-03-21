@@ -13,9 +13,11 @@ namespace ReportService
 {
     public class Startup
     {
+        public static string DBConnectionString;
         public Startup(IConfiguration configuration)
         {
             Configuration = configuration;
+            DBConnectionString = Configuration.GetConnectionString("Employee");
         }
 
         public IConfiguration Configuration { get; }
