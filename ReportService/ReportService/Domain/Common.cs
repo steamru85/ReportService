@@ -23,12 +23,13 @@ namespace ReportService.Domain
                 streamWriter.Flush();
                 streamWriter.Close();
             }
-
             var httpResponse = (HttpWebResponse)httpWebRequest.GetResponse();
-            var reader = new System.IO.StreamReader(httpResponse.GetResponseStream(), true);
-            string responseText = reader.ReadToEnd();
+            var responseText = "";
+            using (var reader = new StreamReader(httpResponse.GetResponseStream(), true))
+            {
+                responseText = reader.ReadToEnd();
+            }
             return (int)Decimal.Parse(responseText);
         }
-
     }
 }
