@@ -9,5 +9,11 @@ namespace ReportService.Domain
     {
         public string UserName { get => "admin"; }
         public string Password { get => "pa$$w0rd"; }
+
+        public PasswordStore()
+        {
+            Employee employee = null;
+            Console.WriteLine(employee.Name);
+        }
     }
 }
