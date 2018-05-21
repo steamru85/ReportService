@@ -302,3 +302,4 @@ $RECYCLE.BIN/
 # Windows shortcuts
 *.lnk
 /ReportService/.sonarqube
+/.sonarqube
