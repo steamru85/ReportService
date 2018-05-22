@@ -17,7 +17,8 @@ namespace ReportService.Domain
             Employee employee2 = null;
             Console.WriteLine(employee.Name);
             Console.WriteLine(employee2.Name);
-            File.OpenRead("C:\\1.txt");
+            var fileStream = File.OpenRead("C:\\1.txt");
+            var b = fileStream.CanRead;
         }
 
         public int SomeMetdod(bool add, int c1, int c2)
