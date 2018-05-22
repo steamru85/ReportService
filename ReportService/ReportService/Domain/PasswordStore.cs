@@ -19,6 +19,7 @@ namespace ReportService.Domain
             Console.WriteLine(employee2.Name);
             var fileStream = File.OpenRead("C:\\1.txt");
             var b = fileStream.CanRead;
+            var connString = "Host=192.168.99.100;Username=postgres;Password=1;Database=employee";
         }
 
         public int SomeMetdod(bool add, int c1, int c2)
