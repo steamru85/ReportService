@@ -45,7 +45,7 @@ namespace ReportService.Controllers
                 actions.Add((new ReportFormatter(null).WL, new Employee()));
                 actions.Add((new ReportFormatter(null).NL, new Employee()));
                 actions.Add((new ReportFormatter(null).WD, new Employee() { Department = depName } ));
-                for (int i = 1; i < emplist.Count(); i ++)
+                for (int i = 0; i < emplist.Count(); i++)
                 {
                     actions.Add((new ReportFormatter(emplist[i]).NL, emplist[i]));
                     actions.Add((new ReportFormatter(emplist[i]).WE, emplist[i]));
