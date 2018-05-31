@@ -1,16 +1,20 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-
-namespace ReportService.Domain
+﻿namespace ReportService.Domain
 {
     public class Employee
     {
-        public string Name { get; set; }
-        public string Department { get; set; }
-        public string  Inn { get; set; }
-        public int Salary { get; set; }
-        public string BuhCode { get; set; }
+        public Employee(string name, string department, string inn, decimal salary, string buhCode)
+        {
+            Name = name;
+            Department = department;
+            Inn = inn;
+            Salary = salary;
+            BuhCode = buhCode;
+        }
+
+        public string Name { get; }
+        public string Department { get; }
+        public string  Inn { get; }
+        public decimal Salary { get; }
+        public string BuhCode { get; }
     }
 }

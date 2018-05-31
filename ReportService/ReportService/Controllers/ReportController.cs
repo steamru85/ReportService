@@ -4,6 +4,7 @@ using System.Linq;
 using Microsoft.AspNetCore.Mvc;
 using Npgsql;
 using ReportService.Domain;
+using ReportService.Service;
 
 namespace ReportService.Controllers
 {
@@ -17,42 +18,46 @@ namespace ReportService.Controllers
             var actions = new List<(Action<Employee, Report>, Employee)>();
             var report = new Report() { S = Common.MonthNameResolver.GetName(year, month) };
             var connString = "Host=192.168.99.100;Username=postgres;Password=1;Database=employee";
-            
 
             var conn = new NpgsqlConnection(connString);
             conn.Open();
-            var cmd = new NpgsqlCommand("SELECT d.name from deps d where d.active = true", conn);
+
+            var empList = new List<Employee>();
+            var cmd = new NpgsqlCommand("SELECT e.name, e.inn, d.name FROM emps e LEFT JOIN deps d ON e.departmentid = d.id WHERE d.active = true", conn);
             var reader = cmd.ExecuteReader();
             while (reader.Read())
             {
-                List<Employee> emplist = new List<Employee>();
-                var depName = reader.GetString(0);
-                var conn1 = new NpgsqlConnection(connString);
-                conn1.Open();
-                var cmd1 = new NpgsqlCommand("SELECT e.name, e.inn, d.name from emps e left join deps d on e.departmentid = d.id", conn1);
-                var reader1 = cmd1.ExecuteReader();
-                while (reader1.Read())
-                {
-                    var emp = new Employee() { Name = reader1.GetString(0), Inn = reader1.GetString(1), Department = reader1.GetString(2) };
-                    emp.BuhCode = EmpCodeResolver.GetCode(emp.Inn).Result;
-                    emp.Salary = emp.Salary();
-                    if (emp.Department != depName)
-                        continue;
-                    emplist.Add(emp);
-                }
+                string inn = reader.GetString(1);
+                string employeeCode = HumanResourcesDepartment.GetAccountCode(inn).Result;
+                var emp = new Employee(
+                    reader.GetString(0),
+                    reader.GetString(2),
+                    inn,
+                    BookkeepingDepartment.GetSalary(inn, employeeCode),
+                    employeeCode);
 
-                actions.Add((new ReportFormatter(null).NL, new Employee()));
-                actions.Add((new ReportFormatter(null).WL, new Employee()));
-                actions.Add((new ReportFormatter(null).NL, new Employee()));
-                actions.Add((new ReportFormatter(null).WD, new Employee() { Department = depName } ));
-                for (int i = 0; i < emplist.Count(); i++)
-                {
-                    actions.Add((new ReportFormatter(emplist[i]).NL, emplist[i]));
-                    actions.Add((new ReportFormatter(emplist[i]).WE, emplist[i]));
-                    actions.Add((new ReportFormatter(emplist[i]).WT, emplist[i]));
-                    actions.Add((new ReportFormatter(emplist[i]).WS, emplist[i]));
-                }  
+                empList.Add(emp);
             }
+
+            conn.Close();
+
+            var depEmpList = empList.GroupBy(i => i.Department);
+            foreach (var departmentGroup in depEmpList)
+            {
+                actions.Add((new ReportFormatter(null).NL, null));
+                actions.Add((new ReportFormatter(null).WL, null));
+                actions.Add((new ReportFormatter(null).NL, null));
+                actions.Add((new ReportFormatter(null).WD, departmentGroup.FirstOrDefault()));
+
+                foreach (var employee in departmentGroup)
+                {
+                    actions.Add((new ReportFormatter(employee).NL, employee));
+                    actions.Add((new ReportFormatter(employee).WE, employee));
+                    actions.Add((new ReportFormatter(employee).WT, employee));
+                    actions.Add((new ReportFormatter(employee).WS, employee));
+                }
+            }
+
             actions.Add((new ReportFormatter(null).NL, null));
             actions.Add((new ReportFormatter(null).WL, null));
 
