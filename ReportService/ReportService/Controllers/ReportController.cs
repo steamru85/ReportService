@@ -1,9 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Globalization;
-using System.IO;
 using System.Linq;
-using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using Npgsql;
 using ReportService.Domain;
@@ -18,7 +15,7 @@ namespace ReportService.Controllers
         public IActionResult Download(int year, int month)
         {
             var actions = new List<(Action<Employee, Report>, Employee)>();
-            var report = new Report() { S = MonthNameResolver.MonthName.GetName(year, month) };
+            var report = new Report() { S = Common.MonthNameResolver.GetName(year, month) };
             var connString = "Host=192.168.99.100;Username=postgres;Password=1;Database=employee";
             
 
@@ -55,7 +52,6 @@ namespace ReportService.Controllers
                     actions.Add((new ReportFormatter(emplist[i]).WT, emplist[i]));
                     actions.Add((new ReportFormatter(emplist[i]).WS, emplist[i]));
                 }  
-
             }
             actions.Add((new ReportFormatter(null).NL, null));
             actions.Add((new ReportFormatter(null).WL, null));
@@ -64,9 +60,8 @@ namespace ReportService.Controllers
             {
                 act.Item1(act.Item2, report);
             }
-            report.Save();
-            var file = System.IO.File.ReadAllBytes("D:\\report.txt");
-            var response = File(file, "application/octet-stream", "report.txt");
+            
+            var response = File(report.Stream(), "application/octet-stream", "report.txt");
             return response;
         }
     }

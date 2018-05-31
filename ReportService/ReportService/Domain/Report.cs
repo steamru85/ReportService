@@ -1,16 +1,14 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
+﻿using System.IO;
+using System.Text;
 
 namespace ReportService.Domain
 {
     public class Report
     {
         public string S { get; set; }
-        public void Save()
+        public Stream Stream()
         {
-            System.IO.File.WriteAllText("D:\\report.txt", S);
+            return new MemoryStream(Encoding.UTF8.GetBytes(S ?? ""));
         }
     }
 }
