@@ -22,6 +22,7 @@
     <PackageReference Include="Microsoft.AspNetCore.All" Version="2.0.3" />
     <PackageReference Include="MySql.Data" Version="6.10.6" />
     <PackageReference Include="Npgsql" Version="3.2.6" />
+    <PackageReference Include="Nustache" Version="1.16.0.8" />
   </ItemGroup>
 
   <ItemGroup>

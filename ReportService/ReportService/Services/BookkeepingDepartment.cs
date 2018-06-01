@@ -2,22 +2,29 @@
 using System.Net;
 using Newtonsoft.Json;
 
-namespace ReportService.Service
+namespace ReportService.Services
 {
     /// <summary>
     /// Bookkeeping department service
     /// </summary>
     public class BookkeepingDepartment
     {
+        private readonly string _endPoint;
+
+        public BookkeepingDepartment(string endPoint)
+        {
+            _endPoint = endPoint;
+        }
+
         /// <summary>
         /// Get the salary of an employee
         /// </summary>
         /// <param name="inn">emloyee INN</param>
         /// <param name="employeeCode">employee code from HR department service</param>
         /// <returns>salary value</returns>
-        public static decimal GetSalary(string inn, string employeeCode)
+        public decimal GetSalary(string inn, string employeeCode)
         {
-            var httpWebRequest = (HttpWebRequest)WebRequest.Create($"http://salary.local/api/empcode/{inn}");
+            var httpWebRequest = (HttpWebRequest)WebRequest.Create($"{_endPoint}{inn}");
             httpWebRequest.ContentType = "application/json";
             httpWebRequest.Method = "POST";
 

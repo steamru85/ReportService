@@ -1,72 +1,76 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
+using System.IO;
 using System.Linq;
+using System.Text;
 using Microsoft.AspNetCore.Mvc;
-using Npgsql;
+using Microsoft.Extensions.Logging;
+using ReportService.DbAccessor;
 using ReportService.Domain;
-using ReportService.Service;
+using ReportService.Repository;
 
 namespace ReportService.Controllers
 {
     [Route("api/[controller]")]
     public class ReportController : Controller
     {
+        private readonly IDbAccessor _dbAccessor;
+        private readonly ILogger<ReportController> _logger;
+        private readonly IReportRepository<Employee> _employeeRepository;
+
+        public ReportController(IDbAccessor dbAccessor, IReportRepository<Employee> employeeRepository, ILogger<ReportController> logger)
+        {
+            _dbAccessor = dbAccessor;
+            _employeeRepository = employeeRepository;
+            _logger = logger;
+        }
+
         [HttpGet]
         [Route("{year}/{month}")]
         public IActionResult Download(int year, int month)
         {
-            var actions = new List<(Action<Employee, Report>, Employee)>();
-            var report = new Report() { S = Common.MonthNameResolver.GetName(year, month) };
-            var connString = "Host=192.168.99.100;Username=postgres;Password=1;Database=employee";
+            _logger.LogInformation("Download report {0} {1}", year, month);
+            _dbAccessor.Connect();
+            List<Employee> employeeList = _employeeRepository.Get().ToList();
+            _dbAccessor.Close();
 
-            var conn = new NpgsqlConnection(connString);
-            conn.Open();
+            var depEmpList = employeeList.GroupBy(i => i.Department);
 
-            var empList = new List<Employee>();
-            var cmd = new NpgsqlCommand("SELECT e.name, e.inn, d.name FROM emps e LEFT JOIN deps d ON e.departmentid = d.id WHERE d.active = true", conn);
-            var reader = cmd.ExecuteReader();
-            while (reader.Read())
+            object data = new
             {
-                string inn = reader.GetString(1);
-                string employeeCode = HumanResourcesDepartment.GetAccountCode(inn).Result;
-                var emp = new Employee(
-                    reader.GetString(0),
-                    reader.GetString(2),
-                    inn,
-                    BookkeepingDepartment.GetSalary(inn, employeeCode),
-                    employeeCode);
-
-                empList.Add(emp);
-            }
-
-            conn.Close();
-
-            var depEmpList = empList.GroupBy(i => i.Department);
-            foreach (var departmentGroup in depEmpList)
-            {
-                actions.Add((new ReportFormatter(null).NL, null));
-                actions.Add((new ReportFormatter(null).WL, null));
-                actions.Add((new ReportFormatter(null).NL, null));
-                actions.Add((new ReportFormatter(null).WD, departmentGroup.FirstOrDefault()));
-
-                foreach (var employee in departmentGroup)
+                departments = depEmpList.Select(i => new
                 {
-                    actions.Add((new ReportFormatter(employee).NL, employee));
-                    actions.Add((new ReportFormatter(employee).WE, employee));
-                    actions.Add((new ReportFormatter(employee).WT, employee));
-                    actions.Add((new ReportFormatter(employee).WS, employee));
-                }
-            }
+                    name = i.Key,
+                    amount = i.Sum(e => e.Salary),
+                    employees = i.Select(e => new {
+                        name = e.Name,
+                        salary = e.Salary
+                    })
+                }).ToList(),
+                month = Common.MonthNameResolver.GetName(year, month),
+                year = year,
+                totalamount = employeeList.Sum(i => i.Salary)
+            };
 
-            actions.Add((new ReportFormatter(null).NL, null));
-            actions.Add((new ReportFormatter(null).WL, null));
+            string report = Nustache.Core.Render.StringToString(
+@"{{{month}}} {{year}}
+{{#departments}}
 
-            foreach (var act in actions)
-            {
-                act.Item1(act.Item2, report);
-            }
-            
-            var response = File(report.Stream(), "application/octet-stream", "report.txt");
+---
+{{{name}}}
+
+{{#employees}}
+{{{name}}}         {{salary}}
+
+{{/employees}}
+Всего по отделу     {{amount}}p
+{{/departments}}
+
+---
+
+Всего по предприятию    {{totalamount}}p", data);
+
+            //var response = Content(report, "text/plan");
+            var response = File(new MemoryStream(Encoding.UTF8.GetBytes(report)), "application/octet-stream", "report.txt");
             return response;
         }
     }
