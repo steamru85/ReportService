@@ -38,12 +38,10 @@ namespace ReportService.Controllers
                 var depName = dep.Name;
                 
                 
-                foreach(var emp in employeeDB.GetEmployees())
+                foreach(var emp in employeeDB.GetEmployeesFromDepartment(dep))
                 {                
                     emp.BuhCode = empCodeResolver.GetCode(emp.Inn).Result;
-                    emp.Salary = salaryService.Salary(emp);
-                    if (emp.Department != depName)
-                        continue;
+                    emp.Salary = salaryService.Salary(emp);                    
                     emplist.Add(emp);
                 }
 
