@@ -1,12 +1,14 @@
 using System;
 using System.Collections.Generic;
+using System.Data;
 using Microsoft.Extensions.Configuration;
 using Npgsql;
+using NpgsqlTypes;
 using ReportService.Domain;
 
 namespace ReportService.EmployeeDB
 {
-    public class EmpDB : IEmployeeDB
+    public class EmpDB : IEmployeeDB,IDisposable
     {
         private readonly string connectionString;
 
@@ -14,33 +16,70 @@ namespace ReportService.EmployeeDB
         {
             connectionString = config.GetValue<string>("employeeConnectionString");
         }
-
+        NpgsqlConnection _connection;
+        NpgsqlConnection Connection{
+            get{
+                if(_connection==null){
+                    _connection=new NpgsqlConnection(connectionString);
+                    _connection.Open();
+                }
+                return _connection;
+            }
+        }
         public IEnumerable<Department> GetDepartments()
         {
-            using (var conn = new NpgsqlConnection(connectionString))
+            using(var cmd = new NpgsqlCommand("SELECT d.name ,d.id from deps d where d.active = true", Connection))
             {
-                conn.Open();
-                var cmd = new NpgsqlCommand("SELECT d.name from deps d where d.active = true", conn);
-                var reader = cmd.ExecuteReader();
-                while (reader.Read())
-                {
-                    yield return new Department(reader);
-                }
-            }
+                using(var reader = cmd.ExecuteReader())                    
+                    while (reader.Read())
+                        yield return new Department(reader);
+            }            
         }
 
         public IEnumerable<Employee> GetEmployees()
         {
-            using(var conn1 = new NpgsqlConnection(connectionString))
+            var cmd = new NpgsqlCommand("SELECT e.name, e.inn, d.name from emps e left join deps d on e.departmentid = d.id", Connection);
+            var reader = cmd.ExecuteReader();
+            while (reader.Read())
             {
-                conn1.Open();
-                var cmd1 = new NpgsqlCommand("SELECT e.name, e.inn, d.name from emps e left join deps d on e.departmentid = d.id", conn1);
-                var reader1 = cmd1.ExecuteReader();
-                while (reader1.Read())
-                {
-                    yield return new Employee() { Name = reader1.GetString(0), Inn = reader1.GetString(1), Department = reader1.GetString(2) };
-                }
+                yield return new Employee(reader);
             }
         }
+
+        public IEnumerable<Employee> GetEmployeesFromDepartment(Department department)
+        {
+            var cmd = new NpgsqlCommand("SELECT e.name, e.inn, d.name from emps e left join deps d on e.departmentid = d.id where d.id=:depId", Connection);
+            NpgsqlParameter par=new NpgsqlParameter("depId",NpgsqlDbType.Varchar);//к сожалению тип столбца в таблице не известен, но вставлять значение напрямую в SQL- запрос плохая идея.
+            par.Direction=ParameterDirection.Input;
+            cmd.Parameters.Add(cmd);
+            par.Value=department.Id;
+            var reader = cmd.ExecuteReader();
+            while (reader.Read())
+            {
+                yield return new Employee(reader);
+            }
+
+        }
+
+        #region IDisposable Support
+        private bool disposedValue = false;
+
+        protected virtual void Dispose(bool disposing)
+        {
+            if (!disposedValue)
+            {
+                if (disposing)
+                {
+                    _connection?.Dispose();
+                }
+                disposedValue = true;
+            }
+        }       
+
+        public void Dispose()
+        {
+            Dispose(true);
+        }
+        #endregion
     }
 }

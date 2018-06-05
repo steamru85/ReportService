@@ -7,17 +7,6 @@ namespace ReportService.EmployeeDB{
     {
         IEnumerable<Department> GetDepartments();
         IEnumerable<Employee> GetEmployees();
-    }
-
-    public class Department
-    {
-        
-        public Department(){}
-        public Department(NpgsqlDataReader reader)
-        {
-            Name=reader.GetString(0);
-        }
-
-        public string Name { get; private set; }
-    }
+        IEnumerable<Employee> GetEmployeesFromDepartment(Department department);
+    }   
 }
