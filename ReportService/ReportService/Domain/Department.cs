@@ -12,7 +12,7 @@ namespace ReportService.Domain
             Id = reader.GetString(1);
         }
 
-        public string Name { get; private set; }
-        public string Id { get; private set; }
+        public string Name { get;  set; }
+        public string Id { get;  set; }
     }
 }
