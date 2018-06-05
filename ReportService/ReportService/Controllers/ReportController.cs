@@ -27,9 +27,9 @@ namespace ReportService.Controllers
         public IActionResult Download(int year, int month)
         {
             var report=reporter.MonthReport(year,month);
-            report.Save();
-            var file = System.IO.File.ReadAllBytes("D:\\report.txt");
-            var response = File(file, "application/octet-stream", "report.txt");
+            MemoryStream mem=new MemoryStream();
+            report.SaveTo(mem);            
+            var response = File(mem.ToArray(), "application/octet-stream", "report.txt");
             return response;
         }
     }

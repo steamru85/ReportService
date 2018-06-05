@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -9,11 +10,12 @@ namespace ReportService.Domain
     public class Report
     {
         public string ReportString { get{return body.ToString();} }
-//        public string Header { get; internal set; }
         private StringBuilder body=new StringBuilder();
-        public void Save()
+        public void SaveTo(Stream stream)
         {
-            System.IO.File.WriteAllText("D:\\report.txt", ReportString);
+            using(var writer=new StreamWriter(stream))
+                writer.Write(ReportString);
+            
         }
 
         
