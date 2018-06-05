@@ -10,6 +10,7 @@ using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using ReportService.EmpCode;
 using ReportService.EmployeeDB;
+using ReportService.Reports;
 using ReportService.Salary;
 
 namespace ReportService
@@ -32,6 +33,7 @@ namespace ReportService
             services.AddTransient<IEmployeeDB,EmpDB>();
             services.AddTransient<IEmpCodeResolver,EmpCodeResolver>();
             services.AddTransient<ISalaryService,SalaryService>();
+            services.AddTransient<IReporter,Reporter>();
 
         }
 
