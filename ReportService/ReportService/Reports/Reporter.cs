@@ -1,6 +1,3 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
 using ReportService.Domain;
 using ReportService.EmpCode;
 using ReportService.EmployeeDB;
@@ -44,6 +41,10 @@ namespace ReportService.Reports{
             report.AddDelimiter();
             report.AddNameWithValue(totalSalary.Name,totalSalary.Salary);
             return report;
+        }
+        Report IReporter.MonthReport(int year, int month)
+        {
+            throw new System.NotImplementedException();
         }
     }
 }

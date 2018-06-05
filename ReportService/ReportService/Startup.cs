@@ -21,22 +21,17 @@ namespace ReportService
         {
             Configuration = configuration;
         }
-
         public IConfiguration Configuration { get; }
-
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
             services.AddMvc();
-
             services.AddSingleton<IConfiguration>(Configuration);            
             services.AddTransient<IEmployeeDB,EmpDB>();
             services.AddTransient<IEmpCodeResolver,EmpCodeResolver>();
             services.AddTransient<ISalaryService,SalaryService>();
             services.AddTransient<IReporter,Reporter>();
-
         }
-
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
         public void Configure(IApplicationBuilder app, IHostingEnvironment env)
         {
@@ -44,7 +39,6 @@ namespace ReportService
             {
                 app.UseDeveloperExceptionPage();
             }
-
             app.UseMvc();
         }
     }
