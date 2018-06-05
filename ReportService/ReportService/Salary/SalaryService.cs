@@ -1,15 +1,22 @@
 using System;
 using System.IO;
 using System.Net;
+using Microsoft.Extensions.Configuration;
 using Newtonsoft.Json;
 using ReportService.Domain;
 
 namespace ReportService.Salary{
     public class SalaryService : ISalaryService
     {
+        private readonly string serviceUri;
+
+        public SalaryService(IConfiguration config)
+        {
+            serviceUri = config.GetValue<string>("empCodeUri");
+        }
         public int Salary(Employee employee)
         {
-            var httpWebRequest = (HttpWebRequest)WebRequest.Create("http://salary.local/api/empcode/"+employee.Inn);
+            var httpWebRequest = (HttpWebRequest)WebRequest.Create(serviceUri+employee.Inn);
             httpWebRequest.ContentType = "application/json";
             httpWebRequest.Method = "POST";
 
