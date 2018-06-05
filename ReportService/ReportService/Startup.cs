@@ -8,7 +8,9 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
+using ReportService.EmpCode;
 using ReportService.EmployeeDB;
+using ReportService.Salary;
 
 namespace ReportService
 {
@@ -28,6 +30,8 @@ namespace ReportService
 
             services.AddSingleton<IConfiguration>(Configuration);            
             services.AddTransient<IEmployeeDB,EmpDB>();
+            services.AddTransient<IEmpCodeResolver,EmpCodeResolver>();
+            services.AddTransient<ISalaryService,SalaryService>();
 
         }
 

@@ -1,16 +1,13 @@
-﻿using Newtonsoft.Json;
 using System;
-using System.Collections.Generic;
 using System.IO;
-using System.Linq;
 using System.Net;
-using System.Threading.Tasks;
+using Newtonsoft.Json;
+using ReportService.Domain;
 
-namespace ReportService.Domain
-{
-    public static class EmployeeCommonMethods
+namespace ReportService.Salary{
+    public class SalaryService : ISalaryService
     {
-        public static int Salary(this Employee employee)
+        public int Salary(Employee employee)
         {
             var httpWebRequest = (HttpWebRequest)WebRequest.Create("http://salary.local/api/empcode/"+employee.Inn);
             httpWebRequest.ContentType = "application/json";
@@ -28,7 +25,7 @@ namespace ReportService.Domain
             var reader = new System.IO.StreamReader(httpResponse.GetResponseStream(), true);
             string responseText = reader.ReadToEnd();
             return (int)Decimal.Parse(responseText);
-        }
 
+        }
     }
 }
