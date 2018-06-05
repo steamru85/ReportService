@@ -1,14 +1,11 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-using Microsoft.AspNetCore.Builder;
+﻿using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
+using Npgsql;
 using ReportService.DbAccessor;
-using ReportService.Domain;
+using ReportService.Report;
 using ReportService.Repository;
 using ReportService.Services;
 
@@ -26,11 +23,17 @@ namespace ReportService
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
+            var serviceOptions = new ReportServiceOptions();
+            Configuration.GetSection("SalaryReportService").Bind(serviceOptions);
             services.AddMvc();
-            services.AddSingleton<IDbAccessor>(i => new NpgsqlAccessor("Host=192.168.99.100;Username=postgres;Password=1;Database=employee"));
-            services.AddScoped(i => new BookkeepingDepartment("http://salary.local/api/empcode/"));
-            services.AddScoped(i => new HumanResourcesDepartment("http://buh.local/api/inn/"));
-            services.AddScoped<IReportRepository<Employee>, ActiveEmployeesRepository>();
+            services.AddScoped<IDbAccessor>(i => new DbAccessor.DbAccessor(new NpgsqlConnection(serviceOptions.DbConnectionString)));
+            services.AddScoped<IBookkeepingDepartment>(i => new BookkeepingDepartment(serviceOptions.BookkeepingDepartment));
+            services.AddScoped<IHumanResourcesDepartment>(i => new HumanResourcesDepartment(serviceOptions.HumanResourcesDepartment));
+            services.AddScoped<IEmployeesRepository, ActiveEmployeesRepository>();
+            services.AddScoped<IEmployeeSalaryReportBuilder>(i => new EmployeeSalaryReportBuilder(
+                i.GetService<IBookkeepingDepartment>(),
+                i.GetService<IHumanResourcesDepartment>(),
+                System.IO.File.ReadAllText(serviceOptions.SalaryReportTemplateFile)));
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.

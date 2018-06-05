@@ -1,4 +1,5 @@
-﻿using System.Data.Common;
+﻿using System.Collections.Generic;
+using System.Threading.Tasks;
 
 namespace ReportService.DbAccessor
 {
@@ -6,6 +7,6 @@ namespace ReportService.DbAccessor
     {
         void Connect();
         void Close();
-        DbDataReader ExecuteCommand(string cmdText);
+        Task<IEnumerable<T>> QueryAsync<T>(string cmdText);
     }
 }

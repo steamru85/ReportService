@@ -7,7 +7,7 @@ namespace ReportService.Services
     /// <summary>
     /// Bookkeeping department service
     /// </summary>
-    public class BookkeepingDepartment
+    public class BookkeepingDepartment : IBookkeepingDepartment
     {
         private readonly string _endPoint;
 

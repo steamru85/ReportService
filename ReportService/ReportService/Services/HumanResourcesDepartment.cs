@@ -6,9 +6,9 @@ namespace ReportService.Services
     /// <summary>
     /// HumanResourcesDepartment service
     /// </summary>
-    public class HumanResourcesDepartment
+    public class HumanResourcesDepartment : IHumanResourcesDepartment
     {
-        private string _endPoint;
+        private readonly string _endPoint;
 
         public HumanResourcesDepartment(string endPoint)
         {

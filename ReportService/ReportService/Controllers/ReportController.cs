@@ -2,11 +2,14 @@
 using System.IO;
 using System.Linq;
 using System.Text;
+using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 using ReportService.DbAccessor;
 using ReportService.Domain;
+using ReportService.Report;
 using ReportService.Repository;
+using ReportService.Services;
 
 namespace ReportService.Controllers
 {
@@ -14,62 +17,27 @@ namespace ReportService.Controllers
     public class ReportController : Controller
     {
         private readonly IDbAccessor _dbAccessor;
-        private readonly ILogger<ReportController> _logger;
-        private readonly IReportRepository<Employee> _employeeRepository;
+        private readonly IEmployeesRepository _employeeRepository;
+        private readonly IEmployeeSalaryReportBuilder _reportBuilder;
 
-        public ReportController(IDbAccessor dbAccessor, IReportRepository<Employee> employeeRepository, ILogger<ReportController> logger)
+        public ReportController(IDbAccessor dbAccessor, IEmployeesRepository employeeRepository, IEmployeeSalaryReportBuilder reportBuilder)
         {
             _dbAccessor = dbAccessor;
             _employeeRepository = employeeRepository;
-            _logger = logger;
+            _reportBuilder = reportBuilder;
         }
 
         [HttpGet]
         [Route("{year}/{month}")]
-        public IActionResult Download(int year, int month)
+        public async Task<IActionResult> Download(int year, int month)
         {
-            _logger.LogInformation("Download report {0} {1}", year, month);
             _dbAccessor.Connect();
-            List<Employee> employeeList = _employeeRepository.Get().ToList();
+
+            IEnumerable<Employee> employees = await _employeeRepository.GetAsync();
+            string report = (await _reportBuilder.BuildData(year, month, employees)).GenerateReport();
+
             _dbAccessor.Close();
 
-            var depEmpList = employeeList.GroupBy(i => i.Department);
-
-            object data = new
-            {
-                departments = depEmpList.Select(i => new
-                {
-                    name = i.Key,
-                    amount = i.Sum(e => e.Salary),
-                    employees = i.Select(e => new {
-                        name = e.Name,
-                        salary = e.Salary
-                    })
-                }).ToList(),
-                month = Common.MonthNameResolver.GetName(year, month),
-                year = year,
-                totalamount = employeeList.Sum(i => i.Salary)
-            };
-
-            string report = Nustache.Core.Render.StringToString(
-@"{{{month}}} {{year}}
-{{#departments}}
-
----
-{{{name}}}
-
-{{#employees}}
-{{{name}}}         {{salary}}
-
-{{/employees}}
-Всего по отделу     {{amount}}p
-{{/departments}}
-
----
-
-Всего по предприятию    {{totalamount}}p", data);
-
-            //var response = Content(report, "text/plan");
             var response = File(new MemoryStream(Encoding.UTF8.GetBytes(report)), "application/octet-stream", "report.txt");
             return response;
         }

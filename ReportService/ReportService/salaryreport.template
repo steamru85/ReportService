@@ -1,0 +1,23 @@
+﻿{{Month}} {{Year}}
+{{#each Departments}}
+{{#newline}}
+{{#newline}}
+---
+{{#newline}}
+{{#newline}}
+{{Department}}
+{{#newline}}
+{{#newline}}
+{{#each Employees}}
+{{Employee.Name}}         {{Salary}}р
+{{#newline}}
+{{#newline}}
+{{/each}}
+Всего по отделу     {{DepartmentAmount}}р
+{{/each}}
+{{#newline}}
+{{#newline}}
+---
+{{#newline}}
+{{#newline}}
+Всего по предприятию    {{TotalAmount}}р

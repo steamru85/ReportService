@@ -1,20 +1,25 @@
-﻿namespace ReportService.Domain
+﻿using System;
+
+namespace ReportService.Domain
 {
-    public class Employee
+    public class Employee : IEquatable<Employee>
     {
-        public Employee(string name, string department, string inn, decimal salary, string buhCode)
+        public Employee(string name, string inn, string department)
         {
             Name = name;
-            Department = department;
             Inn = inn;
-            Salary = salary;
-            BuhCode = buhCode;
+            Department = department;
         }
 
         public string Name { get; }
+        public string Inn { get; }
         public string Department { get; }
-        public string  Inn { get; }
-        public decimal Salary { get; }
-        public string BuhCode { get; }
+
+        public bool Equals(Employee other)
+        {
+            return string.Equals(Name, other.Name) &&
+                   string.Equals(Inn, other.Inn) &&
+                   string.Equals(Department, other.Department);
+        }
     }
 }
