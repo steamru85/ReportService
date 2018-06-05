@@ -20,8 +20,12 @@ namespace ReportService.Reports{
         }
         public Report MonthReport(int year, int month)
         {
+            var totalSalary=new Employee{
+                Name="Всего по предприятию",
+                Salary=0
+            };
             var actions = new List<(Action<Employee, Report>, Employee)>();
-            var report = new Report() { ReportString = MonthNameResolver.MonthName.GetName(year, month) };           
+            var report = new Report() { ReportString = $"{MonthNameResolver.MonthName.GetName(year, month)} {year}" };           
                        
             foreach(var dep in employeeDB.GetDepartments())
             {
@@ -33,6 +37,7 @@ namespace ReportService.Reports{
                 {                
                     emp.BuhCode = empCodeResolver.GetCode(emp.Inn).Result;
                     emp.Salary = salaryService.Salary(emp);                    
+                    totalSalary.Salary+=emp.Salary;
                     emplist.Add(emp);
                 }
 
@@ -51,7 +56,10 @@ namespace ReportService.Reports{
             }
             actions.Add((new ReportFormatter(null).NL, null));
             actions.Add((new ReportFormatter(null).WL, null));
-
+            actions.Add((new ReportFormatter(null).NL, null));
+            actions.Add((new ReportFormatter(totalSalary).WE,totalSalary));
+            actions.Add((new ReportFormatter(totalSalary).WT,totalSalary));
+            actions.Add((new ReportFormatter(totalSalary).WS,totalSalary));
             foreach (var act in actions)
             {
                 act.Item1(act.Item2, report);

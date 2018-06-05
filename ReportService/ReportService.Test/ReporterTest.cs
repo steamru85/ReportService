@@ -19,7 +19,7 @@ namespace ReportService.Test
             var salaryService=new Mock<ISalaryService>();
             var ddd = new ReportService.Reports.Reporter(employeeDB.Object, empCodeResolver.Object, salaryService.Object);
             var rep=ddd.MonthReport(2016,12);
-            Assert.AreEqual("декабрь\n--------------------------------------------",rep.ReportString);
+            Assert.AreEqual("декабрь 2016\n--------------------------------------------\nВсего по предприятию         0р",rep.ReportString);
         }
 
         [TestMethod]
@@ -31,7 +31,7 @@ namespace ReportService.Test
             var salaryService=new Mock<ISalaryService>();
             var ddd = new ReportService.Reports.Reporter(employeeDB.Object, empCodeResolver.Object, salaryService.Object);
             var rep=ddd.MonthReport(2016,12);
-            Assert.AreEqual("декабрь\n--------------------------------------------\nTest\n--------------------------------------------",rep.ReportString);
+            Assert.AreEqual("декабрь 2016\n--------------------------------------------\nTest\n--------------------------------------------\nВсего по предприятию         0р",rep.ReportString);
         }
     }
 }
