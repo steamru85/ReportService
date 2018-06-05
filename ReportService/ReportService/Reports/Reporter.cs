@@ -21,7 +21,7 @@ namespace ReportService.Reports{
         public Report MonthReport(int year, int month)
         {
             var actions = new List<(Action<Employee, Report>, Employee)>();
-            var report = new Report() { S = MonthNameResolver.MonthName.GetName(year, month) };           
+            var report = new Report() { ReportString = MonthNameResolver.MonthName.GetName(year, month) };           
                        
             foreach(var dep in employeeDB.GetDepartments())
             {
