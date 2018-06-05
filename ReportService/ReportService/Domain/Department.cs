@@ -11,6 +11,7 @@ namespace ReportService.Domain
             Name = reader.GetString(0);
             Id = reader.GetString(1);
         }
+        public int Salary{get;set;}
 
         public string Name { get;  set; }
         public string Id { get;  set; }
