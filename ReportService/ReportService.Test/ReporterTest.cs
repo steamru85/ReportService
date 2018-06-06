@@ -55,7 +55,8 @@ Test
             employeeDB.Setup(p=>p.GetEmployeesFromDepartment(It.IsAny<Department>())).Callback(()=>{Console.WriteLine("++++++++++++++");}).Returns(()=>new Employee[]{new Employee{Name="Ivanov Ivan"}});
             var empCodeResolver=new Mock<IEmpCodeResolver>();
             var salaryService=new Mock<ISalaryService>();
-            salaryService.Setup(p=>p.Salary(It.IsAny<Employee>())).Returns(async ()=>{return 500;});
+            
+            salaryService.Setup(p => p.SalaryAsync(It.IsAny<Employee>())).Returns(Task<int>.Factory.StartNew(()=>500));
             var ddd = new ReportService.Reports.Reporter(employeeDB.Object, empCodeResolver.Object, salaryService.Object);
             var rep=await ddd.MonthReportAsync(2016,12);
             Assert.AreEqual(@"декабрь 2016
