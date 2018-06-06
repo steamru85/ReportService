@@ -10,6 +10,7 @@ using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using ReportService.EmpCode;
 using ReportService.EmployeeDB;
+using ReportService.MonthResolver;
 using ReportService.Reports;
 using ReportService.Salary;
 
@@ -31,6 +32,7 @@ namespace ReportService
             services.AddTransient<IEmpCodeResolver,EmpCodeResolver>();
             services.AddTransient<ISalaryService,SalaryService>();
             services.AddTransient<IReporter,Reporter>();
+            services.AddTransient<IMonthResolver,Resolver>();
         }
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
         public void Configure(IApplicationBuilder app, IHostingEnvironment env)
