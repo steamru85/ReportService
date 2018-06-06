@@ -1,4 +1,5 @@
 using System;
+using System.Threading.Tasks;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Moq;
 using ReportService.Domain;
@@ -12,14 +13,14 @@ namespace ReportService.Test
     public class ReporterTest
     {
         [TestMethod]
-        public void NoDepartments()
+        public async Task NoDepartments()
         {
             var employeeDB=new Mock<IEmployeeDB>();
             employeeDB.Setup(p => p.GetDepartments()).Returns(() => new Department[0]);
             var empCodeResolver=new Mock<IEmpCodeResolver>();
             var salaryService=new Mock<ISalaryService>();
             var ddd = new ReportService.Reports.Reporter(employeeDB.Object, empCodeResolver.Object, salaryService.Object);
-            var rep=ddd.MonthReport(2016,12);
+            var rep=await ddd.MonthReportAsync(2016,12);
             Assert.AreEqual(@"декабрь 2016
 --------------------------------------------
 Всего по предприятию         0р
@@ -27,14 +28,14 @@ namespace ReportService.Test
         }
 
         [TestMethod]
-        public void OneEmptyDepartment()
+        public async Task OneEmptyDepartment()
         {
             var employeeDB=new Mock<IEmployeeDB>();
             employeeDB.Setup(p => p.GetDepartments()).Returns(() => new Department[]{new Department{Name="Test"}});
             var empCodeResolver=new Mock<IEmpCodeResolver>();
             var salaryService=new Mock<ISalaryService>();
             var ddd = new ReportService.Reports.Reporter(employeeDB.Object, empCodeResolver.Object, salaryService.Object);
-            var rep=ddd.MonthReport(2016,12);
+            var rep=await ddd.MonthReportAsync(2016,12);
             Assert.AreEqual(@"декабрь 2016
 --------------------------------------------
 Test
@@ -45,7 +46,7 @@ Test
         }
         
         [TestMethod]
-        public void OneNotEmptyDepartment()
+        public async Task OneNotEmptyDepartment()
         {
 
             var employeeDB=new Mock<IEmployeeDB>();
@@ -54,9 +55,9 @@ Test
             employeeDB.Setup(p=>p.GetEmployeesFromDepartment(It.IsAny<Department>())).Callback(()=>{Console.WriteLine("++++++++++++++");}).Returns(()=>new Employee[]{new Employee{Name="Ivanov Ivan"}});
             var empCodeResolver=new Mock<IEmpCodeResolver>();
             var salaryService=new Mock<ISalaryService>();
-            salaryService.Setup(p=>p.Salary(It.IsAny<Employee>())).Returns(500);
+            salaryService.Setup(p=>p.Salary(It.IsAny<Employee>())).Returns(async ()=>{return 500;});
             var ddd = new ReportService.Reports.Reporter(employeeDB.Object, empCodeResolver.Object, salaryService.Object);
-            var rep=ddd.MonthReport(2016,12);
+            var rep=await ddd.MonthReportAsync(2016,12);
             Assert.AreEqual(@"декабрь 2016
 --------------------------------------------
 Test

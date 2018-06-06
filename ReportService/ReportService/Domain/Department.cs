@@ -1,3 +1,4 @@
+using System.Data.Common;
 using Npgsql;
 
 namespace ReportService.Domain
@@ -6,7 +7,7 @@ namespace ReportService.Domain
     {
 
         public Department() { }
-        public Department(NpgsqlDataReader reader)
+        public Department(DbDataReader reader)
         {
             Name = reader.GetString(0);
             Id = reader.GetString(1);

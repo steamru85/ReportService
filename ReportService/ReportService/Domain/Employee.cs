@@ -13,7 +13,8 @@ namespace ReportService.Domain
         public Employee(NpgsqlDataReader reader)
         {
             Name = reader.GetString(0);
-            Inn = reader.GetString(1); Department = reader.GetString(2);
+            Inn = reader.GetString(1); 
+            Department = reader.GetString(2);
         }
 
         public string Name { get; set; }

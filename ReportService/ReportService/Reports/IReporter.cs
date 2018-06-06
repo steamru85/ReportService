@@ -1,8 +1,9 @@
+using System.Threading.Tasks;
 using ReportService.Domain;
 
 namespace ReportService.Reports{
     public interface IReporter
-    {
-        Report MonthReport(int year,int month);
+    {        
+        Task<Report> MonthReportAsync(int year,int month);
     }
 }

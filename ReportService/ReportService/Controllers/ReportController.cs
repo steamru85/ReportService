@@ -24,13 +24,12 @@ namespace ReportService.Controllers
         }
         [HttpGet]
         [Route("{year}/{month}")]
-        public IActionResult Download(int year, int month)
+        public async Task<IActionResult> Download(int year, int month)
         {
-            var report=reporter.MonthReport(year,month);
+            var report=await reporter.MonthReportAsync(year,month);
             MemoryStream mem=new MemoryStream();
-            report.SaveTo(mem);            
-            var response = File(mem.ToArray(), "application/octet-stream", "report.txt");
-            return response;
+            await report.SaveToAsync(mem);            
+            return File(mem.ToArray(), "application/octet-stream", "report.txt");
         }
     }
 }

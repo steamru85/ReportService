@@ -1,6 +1,7 @@
 using System;
 using System.IO;
 using System.Net;
+using System.Threading.Tasks;
 using Microsoft.Extensions.Configuration;
 using Newtonsoft.Json;
 using ReportService.Domain;
@@ -14,24 +15,26 @@ namespace ReportService.Salary{
         {
             serviceUri = config.GetValue<string>("empCodeUri");
         }
-        public int Salary(Employee employee)
+        static JsonSerializer ser=new JsonSerializer();
+        public async Task<int> Salary(Employee employee)
         {
-            var httpWebRequest = (HttpWebRequest)WebRequest.Create(serviceUri+employee.Inn);
+            var httpWebRequest = WebRequest.CreateHttp(serviceUri+employee.Inn);
             httpWebRequest.ContentType = "application/json";
             httpWebRequest.Method = "POST";
-
-            using (var streamWriter = new StreamWriter(httpWebRequest.GetRequestStream()))
+            
+            
+            using (var streamWriter = new StreamWriter(await httpWebRequest.GetRequestStreamAsync()))
             {
-                string json = JsonConvert.SerializeObject(new { employee.BuhCode });
-                streamWriter.Write(json);
-                streamWriter.Flush();
-                streamWriter.Close();
+                ser.Serialize(streamWriter,new { employee.BuhCode });                
+                await streamWriter.FlushAsync();                
             }
-
-            var httpResponse = (HttpWebResponse)httpWebRequest.GetResponse();
-            var reader = new System.IO.StreamReader(httpResponse.GetResponseStream(), true);
-            string responseText = reader.ReadToEnd();
-            return (int)Decimal.Parse(responseText);
+            string responseText;
+            using(var httpResponse = await httpWebRequest.GetResponseAsync())
+            {
+                using(var reader = new StreamReader(httpResponse.GetResponseStream(), true))
+                     responseText=await reader.ReadToEndAsync();
+            }
+            return (int)Decimal.Parse(responseText);//Из условия не понятно является ли отбрасывание дробной части для формирования отчета - так что оставлю как было изначально
 
         }
     }

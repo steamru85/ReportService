@@ -1,16 +1,17 @@
 ﻿using System.IO;
 using System.Text;
+using System.Threading.Tasks;
 
 namespace ReportService.Domain
 {
     public class Report
     {
         public string ReportString { get { return body.ToString(); } }
-        private StringBuilder body = new StringBuilder();
-        public void SaveTo(Stream stream)
+        private StringBuilder body = new StringBuilder();        
+        public async Task SaveToAsync(Stream stream)
         {
             using (var writer = new StreamWriter(stream))
-                writer.Write(ReportString);
+                await writer.WriteAsync(ReportString);
         }
         internal void AddDelimiter()
         {

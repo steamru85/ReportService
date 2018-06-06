@@ -5,6 +5,7 @@ using Microsoft.Extensions.Configuration;
 namespace ReportService.EmpCode{
     public class EmpCodeResolver : IEmpCodeResolver
     {
+        HttpClient client = new HttpClient();
         private readonly string serviceUri;
 
         public EmpCodeResolver(IConfiguration config)
@@ -12,8 +13,7 @@ namespace ReportService.EmpCode{
             serviceUri = config.GetValue<string>("salaryServiceUri");
         }
         public async Task<string> GetCode(string inn)
-        {
-            var client = new HttpClient();
+        {            
             return await client.GetStringAsync(serviceUri + inn);
         }
     }

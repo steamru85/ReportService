@@ -1,3 +1,4 @@
+using System.Threading.Tasks;
 using ReportService.Domain;
 using ReportService.EmpCode;
 using ReportService.EmployeeDB;
@@ -15,7 +16,7 @@ namespace ReportService.Reports{
             this.empCodeResolver=empCodeResolver;
             this.salaryService=salaryService;
         }
-        public Report MonthReport(int year, int month)
+        public async Task<Report> MonthReportAsync(int year, int month)
         {
             var totalSalary=new Department{
                 Name="Всего по предприятию",
@@ -29,8 +30,8 @@ namespace ReportService.Reports{
                 report.AddName(dep.Name);
                 foreach(var emp in employeeDB.GetEmployeesFromDepartment(dep))
                 {
-                    emp.BuhCode = empCodeResolver.GetCode(emp.Inn).Result;
-                    emp.Salary = salaryService.Salary(emp);                    
+                    emp.BuhCode =await empCodeResolver.GetCode(emp.Inn);
+                    emp.Salary =await salaryService.Salary(emp);                    
                     dep.Salary+=emp.Salary;
                     report.AddNameWithValue(emp.Name,emp.Salary);
                 }
@@ -41,10 +42,6 @@ namespace ReportService.Reports{
             report.AddDelimiter();
             report.AddNameWithValue(totalSalary.Name,totalSalary.Salary);
             return report;
-        }
-        Report IReporter.MonthReport(int year, int month)
-        {
-            throw new System.NotImplementedException();
-        }
+        }        
     }
 }
