@@ -1,3 +1,4 @@
+using System.Threading;
 using System.Threading.Tasks;
 using ReportService.Domain;
 using ReportService.EmpCode;
@@ -16,7 +17,10 @@ namespace ReportService.Reports{
             this.empCodeResolver=empCodeResolver;
             this.salaryService=salaryService;
         }
-        public async Task<Report> MonthReportAsync(int year, int month)
+        public async Task<Report> MonthReportAsync(int year, int month){
+            return await MonthReportAsync(year,month,CancellationToken.None);
+        }
+        public async Task<Report> MonthReportAsync(int year,int month,CancellationToken cancel)
         {
             var totalSalary=new Department{
                 Name="Всего по предприятию",
@@ -30,10 +34,11 @@ namespace ReportService.Reports{
                 report.AddName(dep.Name);
                 foreach(var emp in employeeDB.GetEmployeesFromDepartment(dep))
                 {
-                    emp.BuhCode =await empCodeResolver.GetCode(emp.Inn);
-                    emp.Salary =await salaryService.Salary(emp);                    
+                    emp.BuhCode =await empCodeResolver.GetCodeAsync(emp.Inn,cancel);
+                    emp.Salary =await salaryService.SalaryAsync(emp,cancel);                    
                     dep.Salary+=emp.Salary;
                     report.AddNameWithValue(emp.Name,emp.Salary);
+                    cancel.ThrowIfCancellationRequested();
                 }
                 
                 totalSalary.Salary+=dep.Salary;                

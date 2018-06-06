@@ -1,5 +1,6 @@
 ﻿using System.IO;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace ReportService.Domain
@@ -8,7 +9,10 @@ namespace ReportService.Domain
     {
         public string ReportString { get { return body.ToString(); } }
         private StringBuilder body = new StringBuilder();        
-        public async Task SaveToAsync(Stream stream)
+        public async Task SaveToAsync(Stream stream){
+            await SaveToAsync(stream,CancellationToken.None);
+        }
+        public async Task SaveToAsync(Stream stream,CancellationToken cancel)
         {
             using (var writer = new StreamWriter(stream))
                 await writer.WriteAsync(ReportString);

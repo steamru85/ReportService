@@ -11,6 +11,7 @@ using ReportService.EmployeeDB;
 using ReportService.EmpCode;
 using ReportService.Salary;
 using ReportService.Reports;
+using System.Threading;
 
 namespace ReportService.Controllers
 {
@@ -24,11 +25,12 @@ namespace ReportService.Controllers
         }
         [HttpGet]
         [Route("{year}/{month}")]
-        public async Task<IActionResult> Download(int year, int month)
+        public async Task<IActionResult> Download(CancellationToken cancel,int year, int month)
         {
-            var report=await reporter.MonthReportAsync(year,month);
+            var report=await reporter.MonthReportAsync(year,month,cancel);
+            cancel.ThrowIfCancellationRequested();
             MemoryStream mem=new MemoryStream();
-            await report.SaveToAsync(mem);            
+            await report.SaveToAsync(mem,cancel);
             return File(mem.ToArray(), "application/octet-stream", "report.txt");
         }
     }
