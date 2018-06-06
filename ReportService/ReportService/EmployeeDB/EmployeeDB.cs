@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Data;
+using System.Threading.Tasks;
 using Microsoft.Extensions.Configuration;
 using Npgsql;
 using NpgsqlTypes;
@@ -36,16 +37,7 @@ namespace ReportService.EmployeeDB
             }            
         }
 
-        public IEnumerable<Employee> GetEmployees()
-        {
-            var cmd = new NpgsqlCommand("SELECT e.name, e.inn, d.name from emps e left join deps d on e.departmentid = d.id", Connection);
-            var reader = cmd.ExecuteReader();
-            while (reader.Read())
-            {
-                yield return new Employee(reader);
-            }
-        }
-
+       
         public IEnumerable<Employee> GetEmployeesFromDepartment(Department department)
         {
             var cmd = new NpgsqlCommand("SELECT e.name, e.inn, d.name from emps e left join deps d on e.departmentid = d.id where d.id=:depId", Connection);
